@@ -1,0 +1,44 @@
+Uses Boost ASIO to transmit 'player' data to a server and its clients.
+Copyright (C) 2011 Ian Mason
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the license, or 
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+// --
+//
+// DormedasConsoleNetwork
+//
+// 1: About
+// 2: Use
+//
+// --
+
+// --
+// 1: About
+// --
+
+	First, let me thank you for downloading this little example program,
+I spent an entire weekend staring at code trying to make this work, and
+without touching the keyboard, it magically happened.
+
+	The program is very simply a console application wherein a client
+uses the arrow keys to move a corresponding character (literally). It then
+sends this data off to a server, which then relays that data to any connected
+clients.
+
+// -- 
+// 2: Use
+// --
+
+	Arrow keys after you've specified a server's ip address and port and
+a character to 'play' as.
