@@ -1,12 +1,61 @@
 #include <iostream>
 #include <vector>
-#include <Windows.h>
 #include <boost/asio.hpp>
 #include "Player.h"
+#include <Windows.h>
 
 using boost::asio::ip::udp;
 
 enum { max_length = 1024 };
+
+void receiveData(udp::socket & socket, std::vector<Player> & otherPlayers)
+{
+	// reply will hold our char version of the struct data. Endpoint is defined whenever it receives data.
+	char reply[max_length];
+	udp::endpoint sender_endpoint;
+	boost::system::error_code ec;
+
+	size_t reply_length = socket.receive_from(boost::asio::buffer(reply, max_length), sender_endpoint, 0, ec);
+	if(reply_length <= 0)
+	{
+		std::cout << "No bytes received" << std::endl;
+	}
+	else if (reply_length == 5)
+	{
+	}
+	else
+	{
+		// If we have data, reinterpret_cast the char array into a proper PlayerData*
+		bool found = false;
+		PlayerData* temp = reinterpret_cast<PlayerData*>(reply);
+
+		// Check all other players. If its id matches the one received, then set its position as per the new data.
+		for(int i = 0; i < otherPlayers.size(); i++)
+		{
+			if(otherPlayers[i].getID() == temp->id)
+			{
+				otherPlayers[i].clearPosition(); // "undraw"
+				otherPlayers[i].setPosition(temp->x, temp->y); // Set it's position on screen.
+				otherPlayers[i].update(); // "draw"
+				found = true;
+				break; // No need to do extra stuff.
+			}
+		}
+
+		// If we didn't find a player in our vector, then we have a new one!
+		// Create a new player and push it to the vector.
+		if(!found)
+		{
+			Player otherPlayer = Player(true, temp->playerChar);
+			otherPlayer.setID(temp->id);
+			otherPlayer.setPosition(temp->x, temp->y);
+			otherPlayer.update();
+			otherPlayers.push_back(otherPlayer);
+		}
+	}
+	return;
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -75,51 +124,13 @@ int main(int argc, char* argv[])
 		// Every tick we also take in any data waiting for us. Right now it will only take in one thing and then move on
 		// This would be a cool thing to 'fix'
 
-		// reply will hold our char version of the struct data. Endpoint is defined whenever it receives data.
-		char reply[max_length];
-		udp::endpoint sender_endpoint;
-		boost::system::error_code ec;
-
-		// Tells the socket not to block if there's no data waiting to be read in.
 		s.non_blocking(true);
-		size_t reply_length = s.receive_from(boost::asio::buffer(reply, max_length), sender_endpoint, 0, ec);
-		if(reply_length <= 0)
+		// Tells the socket not to block if there's no data waiting to be read in.
+		while(s.available() > 0)
 		{
-			//cout << "No bytes received" << endl;
+			receiveData(s, otherPlayers);
 		}
-		else if (reply_length == 5)
-		{
-		}
-		else
-		{
-			// If we have data, reinterpret_cast the char array into a proper PlayerData*
-			bool found = false;
-			PlayerData* temp = reinterpret_cast<PlayerData*>(reply);
 
-			// Check all other players. If its id matches the one received, then set its position as per the new data.
-			for(int i = 0; i < otherPlayers.size(); i++)
-			{
-				if(otherPlayers[i].getID() == temp->id)
-				{
-					otherPlayers[i].clearPosition(); // "undraw"
-					otherPlayers[i].setPosition(temp->x, temp->y); // Set it's position on screen.
-					otherPlayers[i].update(); // "draw"
-					found = true;
-					break; // No need to do extra stuff.
-				}
-			}
-
-			// If we didn't find a player in our vector, then we have a new one!
-			// Create a new player and push it to the vector.
-			if(!found)
-			{
-				Player otherPlayer = Player(true, temp->playerChar);
-				otherPlayer.setID(temp->id);
-				otherPlayer.setPosition(temp->x, temp->y);
-				otherPlayer.update();
-				otherPlayers.push_back(otherPlayer);
-			}
-		}
 		// Sleep so we can actually tell what's happening.
 		Sleep(100);
 	}
