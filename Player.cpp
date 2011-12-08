@@ -1,10 +1,16 @@
 #include "Player.h"
 
+/*
+	Constructors
+*/
 Player::Player(bool netPlayer, char playerChar)
 {
 	mScreen = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	mNetworkPlayer = netPlayer;
+
+	// Make a really big random number. REALLY low chances of the same one being repeated.
+	// This is in lieu of a formal uuid system.
 	if(!netPlayer)
 	{
 		srand(time(NULL));
@@ -19,18 +25,24 @@ Player::Player(bool netPlayer, char playerChar)
 	mPlayerData.x = 1;
 	mPlayerData.y = 1;
 }
-
-void Player::clearPosition()
-{
-	SetConsoleCursorPosition(mScreen, mPos);
-	std::cout << " ";
-}
-
+/*
+	Set
+*/
 void Player::setPosition(int newX, int newY)
 {
 	mPos.X = newX;
 	mPos.Y = newY;
 	return;
+}
+
+/*
+	Position based methods
+*/
+
+void Player::clearPosition()
+{
+	SetConsoleCursorPosition(mScreen, mPos);
+	std::cout << " ";
 }
 
 int Player::update()
@@ -39,6 +51,8 @@ int Player::update()
 	std::cout << " ";
 
 	bool moved = false;
+
+	// network players do nothing
 
 	if(!mNetworkPlayer)
 	{
